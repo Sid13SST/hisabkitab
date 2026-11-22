@@ -25,7 +25,7 @@ It was built for the ACE Builders Hackathon 2026, Problem Statement 1: *The One-
 No build step and no dependencies.
 
 - Open `index.html` directly in a browser, **or**
-- use the GitHub Pages site (Settings → Pages → deploy from the `main` branch, `/ (root)`): `https://<your-username>.github.io/hisabkitab/`
+- serve this folder with any static file server (for example `npx serve .`) and open the printed URL.
 
 ## Tests
 
