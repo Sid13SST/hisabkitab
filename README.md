@@ -51,3 +51,15 @@ tests/logic.test.js dependency-free Node tests
 - **Core business logic** (`js/logic.js`) was generated in the **Codebenders Nexen IDE** during ACE Builders Hackathon 2026.
 - The **UI, sample data and tests** were built with **Claude Code**.
 - Plain HTML, CSS and JavaScript. No frameworks, CDNs or npm packages.
+
+## Live demo
+
+https://hisabkitab-seven.vercel.app
+
+A browser-local kirana back-office demo with synthetic sample records. Data is stored in this browser; there is no cloud sync or automatic message sending.
+
+## Build notes
+
+Codebenders Nexen generated the core business logic from a brief covering invoices, partial payments, promised dates, receivables aging, 30-90 day cash forecasts, late-payment scenarios and follow-up drafts. The generated logic was retained unchanged. After IDE interruptions, Claude Code completed the interface, sample data and tests. The organizers gave permission for external AI tools by phone.
+
+Verification included 28 automated tests and UI checks for record creation, payments, bill status, promised dates, scenarios and reload persistence. The demo is hosted on Vercel's free tier. No new purchase was made for this build.
