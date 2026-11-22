@@ -378,5 +378,33 @@ test('sample data: Patel 15 days late pushes cash negative (demo scenario)', () 
   assert.ok(r.deltaLowestCash < 0);
 });
 
+// ---------- demo-record safety flag ----------
+test('sample customers are flagged as demo records; user-added customers are not', () => {
+  const s = SampleData.generate(TODAY);
+  s.customers.forEach((c) => {
+    assert.equal(c.isSample, true, c.name);
+    assert.equal(SampleData.isDemoCustomer(c), true, c.name);
+  });
+  const mine = SampleData.createCustomer('cUser1', 'Meera Kirana', '9123456789');
+  assert.equal('isSample' in mine, false);
+  assert.equal(SampleData.isDemoCustomer(mine), false);
+});
+test('demo flag survives a localStorage-style JSON round trip', () => {
+  const s = SampleData.generate(TODAY);
+  s.customers.push(SampleData.createCustomer('cUser1', 'Meera Kirana', '9123456789'));
+  const loaded = JSON.parse(JSON.stringify(s));
+  assert.equal(loaded.customers.filter((c) => SampleData.isDemoCustomer(c)).length, 9);
+  assert.equal(SampleData.isDemoCustomer(loaded.customers.find((c) => c.id === 'cUser1')), false);
+});
+test('restoreSampleFlags re-flags old saved sample customers only', () => {
+  const old = [
+    { id: 'c1', name: 'Ramesh Gupta (Gupta Tea Stall)', phone: '9876543210' },
+    { id: 'c2', name: 'Sunita Sharma', phone: '9000011111' }, // phone changed: not the sample record
+    { id: 'cUser1', name: 'Meera Kirana', phone: '9123456789' },
+  ];
+  SampleData.restoreSampleFlags(old);
+  assert.deepEqual(old.map((c) => SampleData.isDemoCustomer(c)), [true, false, false]);
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

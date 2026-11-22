@@ -46,7 +46,7 @@
       { id: 'c7', name: 'Harpreet Singh (Singh Canteen)', phone: '9815566778' },
       { id: 'c8', name: 'Lakshmi Iyer', phone: '9884123456' },
       { id: 'c9', name: 'Vikram Patel (Patel Hostel Mess)', phone: '9824098765' },
-    ];
+    ].map((c) => Object.assign(c, { isSample: true })); // demo records: contact buttons stay disabled
 
     // issue/due offsets are days from today; negative = in the past.
     const inv = (id, number, customerId, issue, due, lineItems, extra = {}) =>
@@ -145,5 +145,30 @@
     };
   }
 
-  root.SampleData = { generate, ITEMS };
+  // Sample customer ids + phones, used to re-flag demo records saved before isSample existed.
+  const SAMPLE_PHONES = {
+    c1: '9876543210', c2: '9812345678', c3: '9830012345', c4: '9845098450', c5: '9935512340',
+    c6: '9822045671', c7: '9815566778', c8: '9884123456', c9: '9824098765',
+  };
+
+  // True only for customers that came from this sample dataset.
+  function isDemoCustomer(c) {
+    return !!c && c.isSample === true;
+  }
+
+  // The one place a user-entered customer record is built. It never carries isSample,
+  // so WhatsApp / Call actions always work for customers the owner adds.
+  function createCustomer(id, name, phone) {
+    return { id, name, phone };
+  }
+
+  // Older saved stores (before the flag existed): re-flag untouched sample customers.
+  function restoreSampleFlags(customers) {
+    (customers || []).forEach((c) => {
+      if (c && c.isSample === undefined && SAMPLE_PHONES[c.id] === c.phone) c.isSample = true;
+    });
+    return customers;
+  }
+
+  root.SampleData = { generate, ITEMS, isDemoCustomer, createCustomer, restoreSampleFlags };
 })();

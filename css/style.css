@@ -215,6 +215,11 @@ details.items ul { margin: 6px 0 0; padding-left: 16px; font-size: 0.82rem; }
 .btn-danger { background: transparent; border-color: var(--border); color: var(--muted); }
 .btn-danger:hover { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
 .btn-sm { padding: 5px 10px; font-size: 0.82rem; }
+.btn.btn-disabled, .btn.btn-disabled:hover {
+  background: var(--surface-2); border-color: var(--border); color: var(--muted);
+  cursor: not-allowed; pointer-events: none; opacity: 0.7;
+}
+.demo-caption { font-size: 0.8rem; font-weight: 600; color: var(--warn); margin: 8px 0 0; }
 .btn:focus-visible, .filters button:focus-visible, .tabs a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent); outline-offset: 1px;
 }

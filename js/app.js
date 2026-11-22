@@ -39,6 +39,16 @@
 
   const fmtPhone = (p) => (p && p.length === 10 ? `${p.slice(0, 5)} ${p.slice(5)}` : p || '-');
 
+  // Demo (sample) customers have real-looking numbers that may belong to strangers,
+  // so no tel: or wa.me link is ever rendered for them.
+  const isDemo = (c) => window.SampleData.isDemoCustomer(c);
+  const DEMO_CAPTION = 'Demo record: contact buttons disabled';
+
+  function phoneLink(c) {
+    if (isDemo(c)) return `<span class="muted" title="${DEMO_CAPTION}">${esc(fmtPhone(c.phone))}</span>`;
+    return `<a href="tel:+91${esc(c.phone)}">${esc(fmtPhone(c.phone))}</a>`;
+  }
+
   // ---------- storage ----------
 
   function freshStore() {
@@ -68,6 +78,7 @@
       return f;
     }
     s.seenAlertIds = Array.isArray(s.seenAlertIds) ? s.seenAlertIds : [];
+    window.SampleData.restoreSampleFlags(s.customers);
     s.settings.openingCash = Number(s.settings.openingCash) || 0;
     if (!HORIZONS.includes(s.settings.horizonDays)) s.settings.horizonDays = 90;
     return s;
@@ -315,7 +326,7 @@
         const r = rec.get(c.id);
         return `<tr class="clickable" data-href="#/customers/${esc(c.id)}">
           <td><a class="strong" href="#/customers/${esc(c.id)}">${esc(c.name)}</a></td>
-          <td class="nowrap"><a href="tel:+91${esc(c.phone)}">${esc(fmtPhone(c.phone))}</a></td>
+          <td class="nowrap">${phoneLink(c)}</td>
           <td class="num">${r ? money(r.outstanding) : '<span class="muted">₹0</span>'}</td>
           <td class="num ${r && r.overdue ? 'neg' : 'muted'} hide-sm">${money(r ? r.overdue : 0)}</td>
           <td class="num hide-sm">${r ? r.openInvoiceCount : 0}</td>
@@ -353,7 +364,7 @@
       <a class="back" href="#/customers">← Customers</a>
       <div class="page-head">
         <div><h1>${esc(c.name)}</h1>
-          <p class="muted"><a href="tel:+91${esc(c.phone)}">${esc(fmtPhone(c.phone))}</a> · ${invs.length} invoice${invs.length === 1 ? '' : 's'}</p></div>
+          <p class="muted">${phoneLink(c)}${isDemo(c) ? ' <span class="chip chip-neutral">demo record</span>' : ''} · ${invs.length} invoice${invs.length === 1 ? '' : 's'}</p></div>
         <div class="row">
           <a class="btn btn-ghost" href="#/customers/${esc(c.id)}/edit">Edit</a>
           <a class="btn" href="#/invoices/new?customer=${encodeURIComponent(c.id)}">+ New invoice</a>
@@ -514,9 +525,13 @@
         <textarea readonly rows="4" data-reminder aria-label="Drafted reminder">${esc(text)}</textarea>
         <div class="form-actions">
           <button type="button" class="btn btn-ghost" data-action="copy-reminder">Copy message</button>
-          <a class="btn btn-wa" href="${esc(L.whatsappUrl(c.phone, text))}" target="_blank" rel="noopener noreferrer">Open in WhatsApp</a>
-          <a class="btn btn-ghost" href="tel:+91${esc(c.phone)}">Call ${esc(fmtPhone(c.phone))}</a>
+          ${isDemo(c)
+            ? `<span class="btn btn-wa btn-disabled" aria-disabled="true" data-contact-disabled>Open in WhatsApp</span>
+          <span class="btn btn-ghost btn-disabled" aria-disabled="true" data-contact-disabled>Call ${esc(fmtPhone(c.phone))}</span>`
+            : `<a class="btn btn-wa" href="${esc(L.whatsappUrl(c.phone, text))}" target="_blank" rel="noopener noreferrer">Open in WhatsApp</a>
+          <a class="btn btn-ghost" href="tel:+91${esc(c.phone)}">Call ${esc(fmtPhone(c.phone))}</a>`}
         </div>
+        ${isDemo(c) ? `<p class="demo-caption">${DEMO_CAPTION}. Sample numbers may belong to real people.</p>` : ''}
         <p class="note">This only opens <strong>your own</strong> WhatsApp with the text filled in. You check it and press send. HisabKitab never sends anything by itself.</p>
       </section>`;
     }
@@ -1098,7 +1113,7 @@
         toast('Customer saved');
         location.hash = `#/customers/${c.id}`;
       } else {
-        const c = { id: uid('c'), name, phone };
+        const c = window.SampleData.createCustomer(uid('c'), name, phone);
         store.customers.push(c);
         commit();
         toast(`${name} added`);
